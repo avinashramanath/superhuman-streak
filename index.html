@@ -24,21 +24,24 @@
         backdrop-filter: blur(18px);
         border: 1px solid rgba(255, 255, 255, 0.06);
       }
-      .desktop-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+      .sticky-panel {
+        position: static;
       }
       @media (min-width: 1024px) {
         .desktop-layout {
           display: grid;
-          grid-template-columns: 320px 1fr;
-          gap: 24px;
+          grid-template-columns: 300px 1fr;
+          gap: 18px;
+          align-items: start;
+        }
+        .sticky-panel {
+          position: sticky;
+          top: 10px;
+          height: fit-content;
         }
       }
       .task-item {
         transition: 0.22s ease;
-        min-height: 68px;
       }
       .task-item:hover {
         transform: translateX(4px);
@@ -47,15 +50,19 @@
         animation: slideOut 0.35s forwards;
       }
       @keyframes slideOut {
-        to { opacity: 0; transform: translateX(70px) scale(0.96); }
+        to {
+          opacity: 0;
+          transform: translateX(70px) scale(0.96);
+        }
       }
       input[type="checkbox"] {
         appearance: none;
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         border: 2px solid #64748b;
         border-radius: 999px;
         cursor: pointer;
+        position: relative;
         flex-shrink: 0;
       }
       input[type="checkbox"]:checked {
@@ -66,7 +73,7 @@
       input[type="checkbox"]:checked::after {
         content: "✓";
         position: absolute;
-        font-size: 11px;
+        font-size: 10px;
         color: #0f172a;
         font-weight: bold;
         top: 50%;
@@ -85,37 +92,40 @@
         border: 1px solid rgba(34, 211, 238, 0.22);
         color: #67e8f9;
       }
+      #progress-circle {
+        transition: stroke-dashoffset 0.85s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+      }
       .badge-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
+        gap: 6px;
       }
       .badge-card {
         position: relative;
         border-radius: 12px;
-        padding: 10px 4px;
+        padding: 8px 4px;
         text-align: center;
-        min-height: 74px;
+        min-height: 70px;
         transition: 0.25s ease;
         overflow: visible;
       }
       .badge-card.unlocked {
         background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(168, 85, 247, 0.16));
-        border: 1px solid rgba(34, 211, 238, 0.25);
+        border: 1px solid rgba(34, 211, 238, 0.2);
       }
       .badge-card.locked {
         background: #18181b;
         border: 1px solid rgba(255, 255, 255, 0.05);
-        opacity: 0.3;
+        opacity: 0.25;
         filter: grayscale(1);
       }
       .badge-icon {
-        font-size: 22px;
-        margin-bottom: 4px;
+        font-size: 18px;
+        margin-bottom: 2px;
       }
       .badge-title {
-        font-size: 9px;
-        line-height: 1.1;
+        font-size: 8px;
+        line-height: 1.15;
         font-weight: 600;
       }
       .badge-tooltip {
@@ -123,11 +133,11 @@
         bottom: 110%;
         left: 50%;
         transform: translateX(-50%);
-        width: 160px;
+        width: 150px;
         background: #18181b;
         border: 1px solid rgba(255, 255, 255, 0.12);
         color: #fff;
-        padding: 10px;
+        padding: 8px;
         border-radius: 10px;
         font-size: 10px;
         line-height: 1.35;
@@ -144,13 +154,27 @@
         position: fixed;
         inset: 0;
         z-index: 9999;
-        display: none;
+        display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(0, 0, 0, 0.85);
+        background: rgba(0, 0, 0, 0.82);
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.35s ease;
       }
       .overlay.active {
-        display: flex;
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .popup-card {
+        text-align: center;
+        animation: pop 0.65s ease;
+        padding: 20px;
+      }
+      @keyframes pop {
+        0% { transform: scale(0.6); opacity: 0; }
+        70% { transform: scale(1.08); }
+        100% { transform: scale(1); opacity: 1; }
       }
     </style>
   </head>
@@ -158,11 +182,11 @@
 
     <!-- ACHIEVEMENT POPUP -->
     <div id="achievement-overlay" class="overlay">
-      <div class="popup-card text-center bg-zinc-900 rounded-3xl p-8 max-w-xs">
+      <div class="popup-card">
         <div id="popup-icon" class="text-8xl mb-5"></div>
         <div class="uppercase tracking-[0.35em] text-cyan-400 text-sm mb-3">Achievement Unlocked</div>
         <div id="popup-title" class="text-4xl font-bold mb-3"></div>
-        <div id="popup-desc" class="text-zinc-300 leading-7"></div>
+        <div id="popup-desc" class="text-zinc-300 max-w-sm mx-auto leading-7"></div>
       </div>
     </div>
 
@@ -172,8 +196,8 @@
         <div class="uppercase tracking-[0.45em] text-cyan-400 text-sm mb-5">Day Complete</div>
         <div class="text-5xl font-bold mb-8">Go to sleep and rest well.</div>
         <div class="text-zinc-300 text-xl leading-10 mb-10">
-          You became 1% better today.<br><br>
-          Retain your seed.<br>
+          You became 1% better today.<br /><br />
+          Retain your seed.<br />
           Prepare for a better tomorrow.
         </div>
         <button onclick="closeDayComplete()" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-500 font-semibold hover:brightness-110 transition-all">
@@ -192,18 +216,18 @@
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="max-w-7xl mx-auto px-3 py-3">
       <div class="desktop-layout">
-        <!-- LEFT PANEL -->
-        <div class="sticky-panel space-y-4">
-          <div class="glass rounded-3xl p-5">
-            <div class="flex items-start justify-between mb-5">
+        <!-- LEFT -->
+        <div class="sticky-panel space-y-3">
+          <div class="glass rounded-3xl p-4">
+            <div class="flex items-start justify-between mb-4">
               <div>
-                <div class="title-font text-3xl font-bold bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text text-transparent">SUPERHUMAN</div>
-                <div id="rank" class="text-xs tracking-widest text-zinc-500 mt-1">UNAWAKENED</div>
+                <div class="title-font text-2xl font-bold bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text text-transparent">SUPERHUMAN</div>
+                <div id="rank" class="text-[10px] tracking-[0.35em] text-zinc-500 mt-1">UNAWAKENED</div>
               </div>
-              <button onclick="openSettings()" class="w-9 h-9 rounded-2xl bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center">
-                <i class="fa-solid fa-gear"></i>
+              <button onclick="openSettings()" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-all flex items-center justify-center">
+                <i class="fa-solid fa-gear text-sm"></i>
               </button>
             </div>
 
@@ -213,69 +237,69 @@
                 <circle id="progress-circle" cx="60" cy="60" r="52" fill="none" stroke="#22d3ee" stroke-width="10"
                   stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" />
               </svg>
-              <div class="absolute inset-0 flex items-center justify-center flex-col">
-                <div id="xp" class="text-5xl font-bold">0</div>
-                <div id="xp-status" class="text-xs text-cyan-400 mt-1">START STRONG</div>
+              <div class="absolute inset-0 flex items-center justify-center flex-col px-3">
+                <div id="xp" class="text-4xl font-bold leading-none">0</div>
+                <div id="xp-status" class="text-[9px] leading-3 text-cyan-400 mt-2 text-center max-w-[85px]">START STRONG</div>
               </div>
             </div>
 
-            <div class="text-center mt-6">
-              <div id="streak" class="text-5xl font-bold text-orange-400">0</div>
-              <div class="text-xs tracking-widest text-orange-500">DAY STREAK</div>
+            <div class="text-center mt-4">
+              <div id="streak" class="text-4xl font-bold text-orange-400">0</div>
+              <div class="text-[10px] tracking-[0.3em] text-orange-500">DAY STREAK</div>
             </div>
 
-            <div class="mt-6">
-              <div class="flex justify-between text-xs mb-1.5">
+            <div class="mt-5">
+              <div class="flex justify-between text-[10px] mb-1">
                 <span class="text-zinc-400">Next Milestone</span>
                 <span id="next-milestone" class="font-semibold text-orange-400">3 DAYS</span>
               </div>
               <div class="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
                 <div id="milestone-bar" class="h-1.5 bg-gradient-to-r from-orange-400 to-yellow-400 transition-all duration-700"></div>
               </div>
-              <div id="days-remaining" class="text-center text-xs text-zinc-500 mt-2"></div>
+              <div id="days-remaining" class="text-center text-[9px] text-zinc-500 mt-2"></div>
             </div>
 
             <button id="claim-btn" onclick="claimDay()" 
-              class="mt-6 w-full py-4 rounded-2xl font-semibold bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 transition-all">
+              class="mt-5 w-full py-3 rounded-2xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 transition-all">
               🔥 CLAIM TODAY
             </button>
           </div>
 
-          <div class="glass rounded-3xl p-4">
+          <div class="glass rounded-3xl p-3">
             <div class="flex items-center gap-2 mb-3">
-              <i class="fa-solid fa-medal text-yellow-400"></i>
-              <div class="text-sm font-semibold">STREAK RANKS</div>
+              <i class="fa-solid fa-medal text-yellow-400 text-xs"></i>
+              <div class="text-xs font-semibold">STREAK RANKS</div>
             </div>
             <div id="streak-badges" class="badge-grid"></div>
           </div>
 
-          <div class="glass rounded-3xl p-4">
+          <div class="glass rounded-3xl p-3">
             <div class="flex items-center gap-2 mb-3">
-              <i class="fa-solid fa-trophy text-emerald-400"></i>
-              <div class="text-sm font-semibold">TODAY'S ACHIEVEMENTS</div>
+              <i class="fa-solid fa-trophy text-emerald-400 text-xs"></i>
+              <div class="text-xs font-semibold">TODAY'S ACHIEVEMENTS</div>
             </div>
             <div id="daily-badges" class="badge-grid"></div>
           </div>
         </div>
 
-        <!-- RIGHT PANEL -->
-        <div class="space-y-10">
+        <!-- RIGHT -->
+        <div class="space-y-8 mt-6 lg:mt-0">
           <section>
-            <h2 id="morning-title" class="text-cyan-400 text-lg font-semibold mb-4 flex items-center gap-2">
+            <h2 id="morning-title" class="text-cyan-400 text-lg font-semibold mb-3 flex items-center justify-center gap-2">
               <i class="fa-solid fa-sun"></i> MORNING
             </h2>
             <div id="morning-list" class="space-y-3"></div>
           </section>
 
           <section>
-            <h2 id="work-title" class="text-amber-400 text-lg font-semibold mb-4 flex items-center gap-2">
+            <h2 id="work-title" class="text-amber-400 text-lg font-semibold mb-3 flex items-center justify-center gap-2">
               <i class="fa-solid fa-laptop"></i> WORK BLOCK
             </h2>
             <div id="work-list" class="space-y-3"></div>
           </section>
 
           <section>
-            <h2 id="evening-title" class="text-violet-400 text-lg font-semibold mb-4 flex items-center gap-2">
+            <h2 id="evening-title" class="text-violet-400 text-lg font-semibold mb-3 flex items-center justify-center gap-2">
               <i class="fa-solid fa-moon"></i> EVENING
             </h2>
             <div id="evening-list" class="space-y-3"></div>
@@ -285,6 +309,9 @@
     </div>
 
     <script>
+      /* =============================
+         USER DATA & SUPABASE
+      ============================= */
       const defaultUserData = {
         version: 1,
         streak: 0,
@@ -300,8 +327,15 @@
       const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       let userData = structuredClone(defaultUserData);
 
+      /* =============================
+         STORAGE
+      ============================= */
       async function loadData() {
-        const { data, error } = await supabaseClient.from("superhuman_state").select("*").eq("id", 1).single();
+        const { data, error } = await supabaseClient
+          .from("superhuman_state")
+          .select("*")
+          .eq("id", 1)
+          .single();
         if (error || !data) return structuredClone(defaultUserData);
         return { ...structuredClone(defaultUserData), ...data.state };
       }
@@ -320,6 +354,9 @@
         updateClaimButton();
       }
 
+      /* =============================
+         RESET SYSTEM
+      ============================= */
       function getResetKey() {
         const now = new Date();
         const shifted = new Date(now.getTime() - 4 * 60 * 60 * 1000);
@@ -336,6 +373,9 @@
         }
       }
 
+      /* =============================
+         TASKS & ACHIEVEMENTS
+      ============================= */
       const tasks = [
         { id: 1, name: "Wake up at 8 AM", xp: 4, category: "morning" },
         { id: 2, name: "Drink water bottle 1", xp: 1, category: "morning" },
@@ -396,24 +436,9 @@
         { day: 60, icon: "🔱", name: "Immortal", desc: "60 days - God tier consistency." }
       ];
 
-      function playCompleteSound() {
-        try {
-          const audio = new AudioContext();
-          const osc = audio.createOscillator();
-          const gain = audio.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(650, audio.currentTime);
-          gain.gain.value = 0.25;
-          osc.connect(gain).connect(audio.destination);
-          osc.start();
-          setTimeout(() => {
-            osc.frequency.setValueAtTime(950, audio.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audio.currentTime + 0.25);
-            osc.stop(audio.currentTime + 0.3);
-          }, 80);
-        } catch(e) {}
-      }
-
+      /* =============================
+         RENDER & TASK FUNCTIONS
+      ============================= */
       function renderTasks() {
         const sections = { morning: "morning-list", work: "work-list", evening: "evening-list" };
         Object.keys(sections).forEach(cat => {
@@ -444,13 +469,9 @@
         setTimeout(async () => {
           userData.completedTasks[id] = true;
           unlockBadgeByTask(id);
-          
-          playCompleteSound();
-          if (tasks.find(t => t.id === id && t.core)) confetti({ particleCount: 100, spread: 80 });
-
           await refreshUI();
           checkDayCompletion();
-          confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+          confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
         }, 350);
       }
 
@@ -500,6 +521,9 @@
         setTimeout(() => overlay.classList.remove("active"), 5000);
       }
 
+      /* =============================
+         PROGRESS & MILESTONES (NEW LOGIC)
+      ============================= */
       function updateProgress() {
         const xp = Object.keys(userData.completedTasks).reduce((sum, id) => {
           const task = tasks.find(t => t.id === parseInt(id));
@@ -507,15 +531,14 @@
         }, 0);
 
         document.getElementById("xp").textContent = xp;
-        const offset = 326.73 - (326.73 * Math.min(xp, 100)) / 100;
+        const offset = 326.73 - (326.73 * xp) / 100;
         document.getElementById("progress-circle").setAttribute("stroke-dashoffset", offset);
         document.getElementById("streak").textContent = userData.streak;
 
         const status = document.getElementById("xp-status");
         if (xp >= 100) status.innerHTML = "PERFECT DAY 💯";
-        else if (xp >= 85) status.innerHTML = "DAY STRONG 🔥";
-        else if (xp >= 60) status.innerHTML = "GOOD PACE";
-        else status.innerHTML = "KEEP GOING";
+        else if (xp >= 85) status.innerHTML = "DAY SUCCESSFUL";
+        else status.innerHTML = `${85 - xp} XP TO SUCCESS`;
 
         updateMilestones();
         updateRank();
@@ -524,11 +547,13 @@
       function updateMilestones() {
         const streakTarget = 30;
         const allMilestones = [1, 3, 7, 14, 21, 30, 45, 60];
+
         let next = allMilestones.find(m => userData.streak < m) || 60;
         let previous = [...allMilestones].reverse().find(m => userData.streak >= m) || 0;
 
         if (userData.streak >= streakTarget) {
           document.getElementById("next-milestone").textContent = next > 30 ? `${next} DAY BADGE` : "MAX";
+
           if (userData.streak >= 60) {
             document.getElementById("days-remaining").textContent = "All streak ranks conquered.";
           } else {
@@ -613,7 +638,9 @@
         }
       }
 
-      // INIT
+      /* =============================
+         INIT
+      ============================= */
       (async () => {
         userData = await loadData();
         checkDailyReset();
