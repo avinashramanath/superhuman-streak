@@ -3,16 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Superhuman</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
       body {
@@ -20,21 +16,17 @@
         background: #09090b;
         overflow-x: hidden;
       }
-
       .title-font {
         font-family: "Space Grotesk", sans-serif;
       }
-
       .glass {
         background: rgba(24, 24, 27, 0.84);
         backdrop-filter: blur(18px);
         border: 1px solid rgba(255, 255, 255, 0.06);
       }
-
       .sticky-panel {
         position: static;
       }
-
       @media (min-width: 1024px) {
         .desktop-layout {
           display: grid;
@@ -42,33 +34,27 @@
           gap: 18px;
           align-items: start;
         }
-
         .sticky-panel {
           position: sticky;
           top: 10px;
           height: fit-content;
         }
       }
-
       .task-item {
         transition: 0.22s ease;
       }
-
       .task-item:hover {
         transform: translateX(4px);
       }
-
       .task-item.completing {
         animation: slideOut 0.35s forwards;
       }
-
       @keyframes slideOut {
         to {
           opacity: 0;
           transform: translateX(70px) scale(0.96);
         }
       }
-
       input[type="checkbox"] {
         appearance: none;
         width: 16px;
@@ -79,13 +65,11 @@
         position: relative;
         flex-shrink: 0;
       }
-
       input[type="checkbox"]:checked {
         background: #22d3ee;
         border-color: #22d3ee;
         box-shadow: 0 0 12px #22d3ee;
       }
-
       input[type="checkbox"]:checked::after {
         content: "✓";
         position: absolute;
@@ -96,12 +80,10 @@
         left: 50%;
         transform: translate(-50%, -50%);
       }
-
       .core-task {
         border: 1px solid rgba(34, 211, 238, 0.22);
         background: rgba(8, 47, 73, 0.38);
       }
-
       .core-pill {
         font-size: 9px;
         padding: 2px 6px;
@@ -110,19 +92,14 @@
         border: 1px solid rgba(34, 211, 238, 0.22);
         color: #67e8f9;
       }
-
       #progress-circle {
-        transition:
-          stroke-dashoffset 0.85s cubic-bezier(0.4, 0, 0.2, 1),
-          stroke 0.4s ease;
+        transition: stroke-dashoffset 0.85s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
       }
-
       .badge-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 6px;
       }
-
       .badge-card {
         position: relative;
         border-radius: 12px;
@@ -132,31 +109,25 @@
         transition: 0.25s ease;
         overflow: visible;
       }
-
       .badge-card.unlocked {
         background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(168, 85, 247, 0.16));
-
         border: 1px solid rgba(34, 211, 238, 0.2);
       }
-
       .badge-card.locked {
         background: #18181b;
         border: 1px solid rgba(255, 255, 255, 0.05);
         opacity: 0.25;
         filter: grayscale(1);
       }
-
       .badge-icon {
         font-size: 18px;
         margin-bottom: 2px;
       }
-
       .badge-title {
         font-size: 8px;
         line-height: 1.15;
         font-weight: 600;
       }
-
       .badge-tooltip {
         position: absolute;
         bottom: 110%;
@@ -176,11 +147,9 @@
         z-index: 999;
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
       }
-
       .badge-card:hover .badge-tooltip {
         opacity: 1;
       }
-
       .overlay {
         position: fixed;
         inset: 0;
@@ -193,66 +162,44 @@
         pointer-events: none;
         transition: 0.35s ease;
       }
-
       .overlay.active {
         opacity: 1;
         pointer-events: auto;
       }
-
       .popup-card {
         text-align: center;
         animation: pop 0.65s ease;
         padding: 20px;
       }
-
       @keyframes pop {
-        0% {
-          transform: scale(0.6);
-          opacity: 0;
-        }
-
-        70% {
-          transform: scale(1.08);
-        }
-
-        100% {
-          transform: scale(1);
-          opacity: 1;
-        }
+        0% { transform: scale(0.6); opacity: 0; }
+        70% { transform: scale(1.08); }
+        100% { transform: scale(1); opacity: 1; }
       }
     </style>
   </head>
-
   <body class="min-h-screen text-zinc-100">
-    <!-- ACHIEVEMENT POPUP -->
 
+    <!-- ACHIEVEMENT POPUP -->
     <div id="achievement-overlay" class="overlay">
       <div class="popup-card">
         <div id="popup-icon" class="text-8xl mb-5"></div>
-
         <div class="uppercase tracking-[0.35em] text-cyan-400 text-sm mb-3">Achievement Unlocked</div>
-
         <div id="popup-title" class="text-4xl font-bold mb-3"></div>
-
         <div id="popup-desc" class="text-zinc-300 max-w-sm mx-auto leading-7"></div>
       </div>
     </div>
 
     <!-- DAY COMPLETE -->
-
     <div id="day-complete-overlay" class="overlay">
       <div class="text-center px-6 max-w-xl">
         <div class="uppercase tracking-[0.45em] text-cyan-400 text-sm mb-5">Day Complete</div>
-
         <div class="text-5xl font-bold mb-8">Go to sleep and rest well.</div>
-
         <div class="text-zinc-300 text-xl leading-10 mb-10">
           You became 1% better today.<br /><br />
-
           Retain your seed.<br />
           Prepare for a better tomorrow.
         </div>
-
         <button onclick="closeDayComplete()" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-violet-500 font-semibold hover:brightness-110 transition-all">
           🌙 I'll Rest With Gratitude
         </button>
@@ -260,15 +207,11 @@
     </div>
 
     <!-- SETTINGS -->
-
     <div id="settings-overlay" class="overlay">
       <div class="glass rounded-3xl p-8 max-w-md w-full mx-4">
         <div class="text-2xl font-bold mb-6 text-center">Settings</div>
-
         <button onclick="beginAgain()" class="w-full py-4 rounded-2xl bg-red-500 hover:bg-red-400 transition-all font-semibold">↺ Begin Again</button>
-
         <div class="text-center mt-4 text-zinc-400 text-sm">Every master begins again sometimes.</div>
-
         <button onclick="closeSettings()" class="mt-6 w-full py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-all">Close</button>
       </div>
     </div>
@@ -276,137 +219,89 @@
     <div class="max-w-7xl mx-auto px-3 py-3">
       <div class="desktop-layout">
         <!-- LEFT -->
-
         <div class="sticky-panel space-y-3">
-          <!-- PROFILE -->
-
           <div class="glass rounded-3xl p-4">
             <div class="flex items-start justify-between mb-4">
               <div>
                 <div class="title-font text-2xl font-bold bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text text-transparent">SUPERHUMAN</div>
-
                 <div id="rank" class="text-[10px] tracking-[0.35em] text-zinc-500 mt-1">UNAWAKENED</div>
               </div>
-
               <button onclick="openSettings()" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-all flex items-center justify-center">
                 <i class="fa-solid fa-gear text-sm"></i>
               </button>
             </div>
 
-            <!-- XP -->
-
             <div class="relative w-32 h-32 mx-auto">
               <svg class="w-32 h-32 rotate-[-90deg]" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="52" fill="none" stroke="#27272a" stroke-width="10" />
-
-                <circle
-                  id="progress-circle"
-                  cx="60"
-                  cy="60"
-                  r="52"
-                  fill="none"
-                  stroke="#22d3ee"
-                  stroke-width="10"
-                  stroke-dasharray="326.73"
-                  stroke-dashoffset="326.73"
-                  stroke-linecap="round"
-                />
+                <circle id="progress-circle" cx="60" cy="60" r="52" fill="none" stroke="#22d3ee" stroke-width="10"
+                  stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" />
               </svg>
-
               <div class="absolute inset-0 flex items-center justify-center flex-col px-3">
                 <div id="xp" class="text-4xl font-bold leading-none">0</div>
-
                 <div id="xp-status" class="text-[9px] leading-3 text-cyan-400 mt-2 text-center max-w-[85px]">START STRONG</div>
               </div>
             </div>
 
-            <!-- STREAK -->
-
             <div class="text-center mt-4">
               <div id="streak" class="text-4xl font-bold text-orange-400">0</div>
-
               <div class="text-[10px] tracking-[0.3em] text-orange-500">DAY STREAK</div>
             </div>
 
-            <!-- MILESTONE -->
-
             <div class="mt-5">
               <div class="flex justify-between text-[10px] mb-1">
-                <span class="text-zinc-400"> Next Milestone </span>
-
-                <span id="next-milestone" class="font-semibold text-orange-400"> 3 DAYS </span>
+                <span class="text-zinc-400">Next Milestone</span>
+                <span id="next-milestone" class="font-semibold text-orange-400">3 DAYS</span>
               </div>
-
               <div class="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
                 <div id="milestone-bar" class="h-1.5 bg-gradient-to-r from-orange-400 to-yellow-400 transition-all duration-700"></div>
               </div>
-
               <div id="days-remaining" class="text-center text-[9px] text-zinc-500 mt-2"></div>
             </div>
 
-            <!-- CLAIM -->
-
-            <button
-              id="claim-btn"
-              onclick="claimDay()"
-              class="mt-5 w-full py-3 rounded-2xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 transition-all"
-            >
+            <button id="claim-btn" onclick="claimDay()" 
+              class="mt-5 w-full py-3 rounded-2xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 transition-all">
               🔥 CLAIM TODAY
             </button>
           </div>
 
-          <!-- STREAK BADGES -->
-
           <div class="glass rounded-3xl p-3">
             <div class="flex items-center gap-2 mb-3">
               <i class="fa-solid fa-medal text-yellow-400 text-xs"></i>
-
               <div class="text-xs font-semibold">STREAK RANKS</div>
             </div>
-
             <div id="streak-badges" class="badge-grid"></div>
           </div>
-
-          <!-- DAILY ACHIEVEMENTS -->
 
           <div class="glass rounded-3xl p-3">
             <div class="flex items-center gap-2 mb-3">
               <i class="fa-solid fa-trophy text-emerald-400 text-xs"></i>
-
               <div class="text-xs font-semibold">TODAY'S ACHIEVEMENTS</div>
             </div>
-
             <div id="daily-badges" class="badge-grid"></div>
           </div>
         </div>
 
         <!-- RIGHT -->
-
         <div class="space-y-8 mt-6 lg:mt-0">
           <section>
             <h2 id="morning-title" class="text-cyan-400 text-lg font-semibold mb-3 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-sun"></i>
-              MORNING
+              <i class="fa-solid fa-sun"></i> MORNING
             </h2>
-
             <div id="morning-list" class="space-y-3"></div>
           </section>
 
           <section>
             <h2 id="work-title" class="text-amber-400 text-lg font-semibold mb-3 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-laptop"></i>
-              WORK BLOCK
+              <i class="fa-solid fa-laptop"></i> WORK BLOCK
             </h2>
-
             <div id="work-list" class="space-y-3"></div>
           </section>
 
           <section>
             <h2 id="evening-title" class="text-violet-400 text-lg font-semibold mb-3 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-moon"></i>
-              EVENING
+              <i class="fa-solid fa-moon"></i> EVENING
             </h2>
-
             <div id="evening-list" class="space-y-3"></div>
           </section>
         </div>
@@ -415,29 +310,72 @@
 
     <script>
       /* =============================
-   USER DATA
-============================= */
-
+         USER DATA & SUPABASE
+      ============================= */
       const defaultUserData = {
         version: 1,
-
         streak: 0,
-
         completedTasks: {},
-
         unlockedBadges: [],
-
         claimedToday: false,
-
         lastReset: ""
       };
 
-      let userData = loadData();
+      const SUPABASE_URL = "https://yclnftrwsmtvmqxmmenu.supabase.co";
+      const SUPABASE_KEY = "sb_publishable_YsuBqGbTwxH7ImN4P2v7ag_2x5yTCcg";
+
+      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      let userData = structuredClone(defaultUserData);
 
       /* =============================
-   TASKS
-============================= */
+         STORAGE
+      ============================= */
+      async function loadData() {
+        const { data, error } = await supabaseClient
+          .from("superhuman_state")
+          .select("*")
+          .eq("id", 1)
+          .single();
+        if (error || !data) return structuredClone(defaultUserData);
+        return { ...structuredClone(defaultUserData), ...data.state };
+      }
 
+      async function saveData() {
+        await supabaseClient.from("superhuman_state").upsert({ id: 1, state: userData });
+      }
+
+      async function refreshUI() {
+        await saveData();
+        renderTasks();
+        renderDailyBadges();
+        renderStreakBadges();
+        updateProgress();
+        updateSectionStates();
+        updateClaimButton();
+      }
+
+      /* =============================
+         RESET SYSTEM
+      ============================= */
+      function getResetKey() {
+        const now = new Date();
+        const shifted = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+        return shifted.toISOString().split("T")[0];
+      }
+
+      function checkDailyReset() {
+        const currentResetKey = getResetKey();
+        if (userData.lastReset !== currentResetKey) {
+          userData.completedTasks = {};
+          userData.unlockedBadges = [];
+          userData.claimedToday = false;
+          userData.lastReset = currentResetKey;
+        }
+      }
+
+      /* =============================
+         TASKS & ACHIEVEMENTS
+      ============================= */
       const tasks = [
         { id: 1, name: "Wake up at 8 AM", xp: 4, category: "morning" },
         { id: 2, name: "Drink water bottle 1", xp: 1, category: "morning" },
@@ -453,7 +391,6 @@
         { id: 12, name: "Morning supplements", xp: 2, category: "morning" },
         { id: 13, name: "11 AM healthy snack", xp: 4, category: "morning" },
         { id: 14, name: "Drink water bottle 4", xp: 1, category: "morning" },
-
         { id: 15, name: "Lunch at 2 PM", xp: 4, category: "work" },
         { id: 16, name: "Afternoon supplements", xp: 2, category: "work" },
         { id: 17, name: "Drink water bottle 5", xp: 1, category: "work" },
@@ -463,7 +400,6 @@
         { id: 21, name: "Have coffee ~2:30 PM", xp: 2, category: "work" },
         { id: 22, name: "5 PM snack + green tea", xp: 4, category: "work" },
         { id: 23, name: "Drink water bottle 7", xp: 1, category: "work" },
-
         { id: 24, name: "Dinner at 8 PM", xp: 4, category: "evening" },
         { id: 25, name: "Evening medication", xp: 2, category: "evening" },
         { id: 26, name: "Evening supplements", xp: 2, category: "evening" },
@@ -474,619 +410,242 @@
         { id: 31, name: "Wind-down + sleep by 12 AM", xp: 5, category: "evening", core: true }
       ];
 
-      /* =============================
-   DAILY ACHIEVEMENTS
-============================= */
-
       const dailyAchievements = [
-        {
-          id: "recharged",
-          icon: "⚡",
-          name: "Recharged",
-          desc: "You hydrated immediately after waking up.",
-          task: 2
-        },
-
-        {
-          id: "prime",
-          icon: "💪",
-          name: "Prime Mode",
-          desc: "You fueled your body with discipline.",
-          task: 12
-        },
-
-        {
-          id: "beast",
-          icon: "🏋️",
-          name: "Beast Mode",
-          desc: "You crushed your gym session today.",
-          task: 6
-        },
-
-        {
-          id: "morning",
-          icon: "☀️",
-          name: "Morning King",
-          desc: "You conquered your entire morning routine.",
-          task: 14
-        },
-
-        {
-          id: "flawless",
-          icon: "🎯",
-          name: "Flawless Run",
-          desc: "You stayed clean and consistent through the day.",
-          task: 15
-        },
-
-        {
-          id: "deepwork",
-          icon: "🧠",
-          name: "Deep Work",
-          desc: "You planned your work and entered focus mode.",
-          task: 18
-        },
-
-        {
-          id: "consistent",
-          icon: "💊",
-          name: "Consistent",
-          desc: "You respected your body's recovery systems.",
-          task: 25
-        },
-
-        {
-          id: "protein",
-          icon: "🥚",
-          name: "Protein King",
-          desc: "You nourished your body properly today.",
-          task: 26
-        },
-
-        {
-          id: "guardian",
-          icon: "🌙",
-          name: "Tomorrow Secured",
-          desc: "You prepared yourself for a stronger tomorrow.",
-          task: 27
-        },
-
-        {
-          id: "locked",
-          icon: "⚔️",
-          name: "Locked In",
-          desc: "You completed your important goals.",
-          task: 28
-        },
-
-        {
-          id: "hydrated",
-          icon: "🚰",
-          name: "Hydrated",
-          desc: "You finished your full hydration target.",
-          task: 29
-        },
-
-        {
-          id: "perfect",
-          icon: "✨",
-          name: "Perfect Day",
-          desc: "You reflected with gratitude and self-awareness.",
-          task: 30
-        }
+        { id: "recharged", icon: "⚡", name: "Recharged", desc: "You hydrated immediately after waking up.", task: 2 },
+        { id: "prime", icon: "💪", name: "Prime Mode", desc: "You fueled your body with discipline.", task: 12 },
+        { id: "beast", icon: "🏋️", name: "Beast Mode", desc: "You crushed your gym session today.", task: 6 },
+        { id: "morning", icon: "☀️", name: "Morning King", desc: "You conquered your entire morning routine.", task: 14 },
+        { id: "flawless", icon: "🎯", name: "Flawless Run", desc: "You stayed clean and consistent through the day.", task: 15 },
+        { id: "deepwork", icon: "🧠", name: "Deep Work", desc: "You planned your work and entered focus mode.", task: 18 },
+        { id: "consistent", icon: "💊", name: "Consistent", desc: "You respected your body's recovery systems.", task: 25 },
+        { id: "protein", icon: "🥚", name: "Protein King", desc: "You nourished your body properly today.", task: 26 },
+        { id: "guardian", icon: "🌙", name: "Tomorrow Secured", desc: "You prepared yourself for a stronger tomorrow.", task: 27 },
+        { id: "locked", icon: "⚔️", name: "Locked In", desc: "You completed your important goals.", task: 28 },
+        { id: "hydrated", icon: "🚰", name: "Hydrated", desc: "You finished your full hydration target.", task: 29 },
+        { id: "perfect", icon: "✨", name: "Perfect Day", desc: "You reflected with gratitude and self-awareness.", task: 30 }
       ];
-
-      /* =============================
-   STREAK BADGES
-============================= */
 
       const streakBadges = [
-        {
-          day: 1,
-          icon: "🌱",
-          name: "Awakened",
-          desc: "You finally began your journey."
-        },
-
-        {
-          day: 3,
-          icon: "⚡",
-          name: "Initiate",
-          desc: "Momentum has officially begun."
-        },
-
-        {
-          day: 7,
-          icon: "🔥",
-          name: "Disciplined",
-          desc: "You survived the hardest phase."
-        },
-
-        {
-          day: 14,
-          icon: "⚔️",
-          name: "Elite",
-          desc: "Your habits are becoming identity."
-        },
-
-        {
-          day: 21,
-          icon: "🧠",
-          name: "Ascended",
-          desc: "Your discipline now feels natural."
-        },
-
-        {
-          day: 30,
-          icon: "👑",
-          name: "Superhuman",
-          desc: "You completed the full transformation."
-        }
+        { day: 1, icon: "🌱", name: "Awakened", desc: "You finally began your journey." },
+        { day: 3, icon: "⚡", name: "Initiate", desc: "Momentum has officially begun." },
+        { day: 7, icon: "🔥", name: "Disciplined", desc: "You survived the hardest phase." },
+        { day: 14, icon: "⚔️", name: "Elite", desc: "Your habits are becoming identity." },
+        { day: 21, icon: "🧠", name: "Ascended", desc: "Your discipline now feels natural." },
+        { day: 30, icon: "👑", name: "Superhuman", desc: "You completed the full transformation." },
+        { day: 45, icon: "🌟", name: "Legend", desc: "45 days of unbreakable discipline." },
+        { day: 60, icon: "🔱", name: "Immortal", desc: "60 days - God tier consistency." }
       ];
 
       /* =============================
-   STORAGE
-============================= */
-
-      function saveData() {
-        localStorage.setItem("superhumanData", JSON.stringify(userData));
-      }
-
-      function loadData() {
-        const saved = localStorage.getItem("superhumanData");
-
-        if (!saved) {
-          return structuredClone(defaultUserData);
-        }
-
-        try {
-          return {
-            ...structuredClone(defaultUserData),
-            ...JSON.parse(saved)
-          };
-        } catch {
-          return structuredClone(defaultUserData);
-        }
-      }
-
-      /* =============================
-   REFRESH UI
-============================= */
-
-      function refreshUI() {
-        saveData();
-
-        renderTasks();
-
-        renderDailyBadges();
-
-        renderStreakBadges();
-
-        updateProgress();
-
-        updateSectionStates();
-
-        updateClaimButton();
-      }
-
-      /* =============================
-   RESET SYSTEM
-============================= */
-
-      function getResetKey() {
-        const now = new Date();
-
-        const shifted = new Date(now.getTime() - 4 * 60 * 60 * 1000);
-
-        return shifted.toISOString().split("T")[0];
-      }
-
-      function checkDailyReset() {
-        const currentResetKey = getResetKey();
-
-        if (userData.lastReset !== currentResetKey) {
-          userData.completedTasks = {};
-
-          userData.unlockedBadges = [];
-
-          userData.claimedToday = false;
-
-          userData.lastReset = currentResetKey;
-
-          refreshUI();
-        }
-      }
-
-      /* =============================
-   XP
-============================= */
-
-      function calculateXP() {
-        return Object.keys(userData.completedTasks).reduce((sum, id) => {
-          const task = tasks.find(t => t.id === parseInt(id));
-
-          return sum + (task ? task.xp : 0);
-        }, 0);
-      }
-
-      /* =============================
-   TASKS
-============================= */
-
+         RENDER & TASK FUNCTIONS
+      ============================= */
       function renderTasks() {
-        const sections = {
-          morning: "morning-list",
-          work: "work-list",
-          evening: "evening-list"
-        };
-
+        const sections = { morning: "morning-list", work: "work-list", evening: "evening-list" };
         Object.keys(sections).forEach(cat => {
           const container = document.getElementById(sections[cat]);
-
           container.innerHTML = "";
-
-          tasks
-            .filter(t => t.category === cat)
-            .forEach(task => {
-              if (userData.completedTasks[task.id]) return;
-
-              const div = document.createElement("div");
-
-              div.className = `task-item glass flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer ${task.core ? "core-task" : ""}`;
-
-              div.innerHTML = `
-
-          <div class="flex items-center gap-3">
-
-            <input type="checkbox">
-
-            <div class="flex items-center gap-2">
-
-              <span class="text-sm">
-                ${task.name}
-              </span>
-
-              ${task.core ? `<span class="core-pill">CORE</span>` : ""}
-
-            </div>
-
-          </div>
-
-          <span class="font-mono text-cyan-300 text-sm font-bold">
-            +${task.xp}
-          </span>
-
-        `;
-
-              div.onclick = () => completeTask(task.id, div);
-
-              container.appendChild(div);
-            });
+          tasks.filter(t => t.category === cat).forEach(task => {
+            if (userData.completedTasks[task.id]) return;
+            const div = document.createElement("div");
+            div.className = `task-item glass flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer ${task.core ? "core-task" : ""}`;
+            div.innerHTML = `
+              <div class="flex items-center gap-3">
+                <input type="checkbox">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">${task.name}</span>
+                  ${task.core ? `<span class="core-pill">CORE</span>` : ""}
+                </div>
+              </div>
+              <span class="font-mono text-cyan-300 text-sm font-bold">+${task.xp}</span>
+            `;
+            div.onclick = () => completeTask(task.id, div);
+            container.appendChild(div);
+          });
         });
       }
 
-      /* =============================
-   COMPLETE TASK
-============================= */
-
       function completeTask(id, el) {
         el.classList.add("completing");
-
-        setTimeout(() => {
+        setTimeout(async () => {
           userData.completedTasks[id] = true;
-
           unlockBadgeByTask(id);
-
-          refreshUI();
-
+          await refreshUI();
           checkDayCompletion();
-
-          confetti({
-            particleCount: 40,
-            spread: 60,
-            origin: { y: 0.8 }
-          });
+          confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 } });
         }, 350);
       }
 
-      /* =============================
-   BADGES
-============================= */
-
       function unlockBadgeByTask(taskId) {
         const badge = dailyAchievements.find(b => b.task === taskId);
-
-        if (!badge) return;
-
-        if (userData.unlockedBadges.includes(badge.id)) return;
-
+        if (!badge || userData.unlockedBadges.includes(badge.id)) return;
         userData.unlockedBadges.unshift(badge.id);
-
         showAchievementPopup(badge);
       }
 
       function renderDailyBadges() {
         const container = document.getElementById("daily-badges");
-
         container.innerHTML = "";
-
         userData.unlockedBadges.forEach(id => {
           const badge = dailyAchievements.find(b => b.id === id);
-
           if (!badge) return;
-
           container.innerHTML += `
-
-      <div class="badge-card unlocked">
-
-        <div class="badge-tooltip">
-          ${badge.desc}
-        </div>
-
-        <div class="badge-icon">
-          ${badge.icon}
-        </div>
-
-        <div class="badge-title">
-          ${badge.name}
-        </div>
-
-      </div>
-
-    `;
+            <div class="badge-card unlocked">
+              <div class="badge-tooltip">${badge.desc}</div>
+              <div class="badge-icon">${badge.icon}</div>
+              <div class="badge-title">${badge.name}</div>
+            </div>`;
         });
       }
 
       function renderStreakBadges() {
         const container = document.getElementById("streak-badges");
-
         container.innerHTML = "";
-
         streakBadges.forEach(badge => {
           const unlocked = userData.streak >= badge.day;
-
           container.innerHTML += `
-
-      <div class="badge-card ${unlocked ? "unlocked" : "locked"}">
-
-        <div class="badge-tooltip">
-          ${badge.desc}
-        </div>
-
-        <div class="badge-icon">
-          ${badge.icon}
-        </div>
-
-        <div class="badge-title">
-          ${badge.name}
-        </div>
-
-      </div>
-
-    `;
+            <div class="badge-card ${unlocked ? "unlocked" : "locked"}">
+              <div class="badge-tooltip">${badge.desc}</div>
+              <div class="badge-icon">${badge.icon}</div>
+              <div class="badge-title">${badge.name}</div>
+            </div>`;
         });
       }
-
-      /* =============================
-   POPUP
-============================= */
 
       function showAchievementPopup(badge) {
         const overlay = document.getElementById("achievement-overlay");
-
         document.getElementById("popup-icon").textContent = badge.icon;
-
         document.getElementById("popup-title").textContent = badge.name;
-
         document.getElementById("popup-desc").textContent = badge.desc;
-
         overlay.classList.add("active");
-
-        confetti({
-          particleCount: 220,
-          spread: 120
-        });
-
-        setTimeout(() => {
-          overlay.classList.remove("active");
-        }, 5000);
+        confetti({ particleCount: 220, spread: 120 });
+        setTimeout(() => overlay.classList.remove("active"), 5000);
       }
 
       /* =============================
-   PROGRESS
-============================= */
-
+         PROGRESS & MILESTONES (NEW LOGIC)
+      ============================= */
       function updateProgress() {
-        const xp = calculateXP();
+        const xp = Object.keys(userData.completedTasks).reduce((sum, id) => {
+          const task = tasks.find(t => t.id === parseInt(id));
+          return sum + (task ? task.xp : 0);
+        }, 0);
 
         document.getElementById("xp").textContent = xp;
-
         const offset = 326.73 - (326.73 * xp) / 100;
-
         document.getElementById("progress-circle").setAttribute("stroke-dashoffset", offset);
-
         document.getElementById("streak").textContent = userData.streak;
 
-        const xpStatus = document.getElementById("xp-status");
-
-        if (xp >= 100) {
-          xpStatus.innerHTML = "PERFECT DAY 💯";
-        } else if (xp >= 85) {
-          xpStatus.innerHTML = "DAY SUCCESSFUL";
-        } else {
-          xpStatus.innerHTML = `${85 - xp} XP TO SUCCESS`;
-        }
+        const status = document.getElementById("xp-status");
+        if (xp >= 100) status.innerHTML = "PERFECT DAY 💯";
+        else if (xp >= 85) status.innerHTML = "DAY SUCCESSFUL";
+        else status.innerHTML = `${85 - xp} XP TO SUCCESS`;
 
         updateMilestones();
-
         updateRank();
       }
 
-      /* =============================
-   CLAIM DAY
-============================= */
+      function updateMilestones() {
+        const streakTarget = 30;
+        const allMilestones = [1, 3, 7, 14, 21, 30, 45, 60];
 
-      function claimDay() {
-        const xp = calculateXP();
+        let next = allMilestones.find(m => userData.streak < m) || 60;
+        let previous = [...allMilestones].reverse().find(m => userData.streak >= m) || 0;
 
-        if (xp < 85) return;
+        if (userData.streak >= streakTarget) {
+          document.getElementById("next-milestone").textContent = next > 30 ? `${next} DAY BADGE` : "MAX";
 
-        if (userData.claimedToday) return;
-
-        userData.streak++;
-
-        userData.claimedToday = true;
-
-        refreshUI();
-
-        confetti({
-          particleCount: 260,
-          spread: 130
-        });
-      }
-
-      /* =============================
-   CLAIM BUTTON
-============================= */
-
-      function updateClaimButton() {
-        const btn = document.getElementById("claim-btn");
-
-        if (userData.claimedToday) {
-          btn.innerHTML = "✅ DAY CLAIMED";
-
+          if (userData.streak >= 60) {
+            document.getElementById("days-remaining").textContent = "All streak ranks conquered.";
+          } else {
+            const left = next - userData.streak;
+            document.getElementById("days-remaining").textContent = `${left} day${left > 1 ? "s" : ""} until ${next}-day badge`;
+          }
+          document.getElementById("milestone-bar").style.width = "100%";
           return;
         }
 
-        btn.innerHTML = "🔥 CLAIM TODAY";
-      }
-
-      /* =============================
-   MILESTONES
-============================= */
-
-      function updateMilestones() {
-        const milestones = [1, 3, 7, 14, 21, 30];
-
-        const next = milestones.find(m => userData.streak < m) || 30;
-
-        const previous = [...milestones].reverse().find(m => userData.streak >= m) || 0;
-
         const range = next - previous || 1;
-
         const progress = ((userData.streak - previous) / range) * 100;
-
         const daysLeft = next - userData.streak;
 
-        document.getElementById("next-milestone").textContent = userData.streak >= 30 ? "MAX" : `${next} DAYS`;
-
-        document.getElementById("days-remaining").textContent = userData.streak >= 30 ? "All milestones conquered." : `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`;
-
-        document.getElementById("milestone-bar").style.width = userData.streak >= 30 ? "100%" : `${Math.max(0, Math.min(progress, 100))}%`;
+        document.getElementById("next-milestone").textContent = `${next} DAYS`;
+        document.getElementById("days-remaining").textContent = `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`;
+        document.getElementById("milestone-bar").style.width = `${Math.max(0, Math.min(progress, 100))}%`;
       }
 
-      /* =============================
-   RANK
-============================= */
+      function claimDay() {
+        const xp = Object.keys(userData.completedTasks).reduce((sum, id) => {
+          const task = tasks.find(t => t.id === parseInt(id));
+          return sum + (task ? task.xp : 0);
+        }, 0);
+        if (xp < 85 || userData.claimedToday) return;
+        userData.streak++;
+        userData.claimedToday = true;
+        refreshUI();
+        confetti({ particleCount: 260, spread: 130 });
+      }
+
+      function updateClaimButton() {
+        document.getElementById("claim-btn").innerHTML = userData.claimedToday ? "✅ DAY CLAIMED" : "🔥 CLAIM TODAY";
+      }
 
       function updateRank() {
         let rank = "UNAWAKENED";
-
-        if (userData.streak >= 30) {
-          rank = "SUPERHUMAN";
-        } else if (userData.streak >= 21) {
-          rank = "ASCENDED";
-        } else if (userData.streak >= 14) {
-          rank = "ELITE";
-        } else if (userData.streak >= 7) {
-          rank = "DISCIPLINED";
-        } else if (userData.streak >= 3) {
-          rank = "INITIATE";
-        } else if (userData.streak >= 1) {
-          rank = "AWAKENED";
-        }
-
+        if (userData.streak >= 60) rank = "IMMORTAL";
+        else if (userData.streak >= 45) rank = "LEGEND";
+        else if (userData.streak >= 30) rank = "SUPERHUMAN";
+        else if (userData.streak >= 21) rank = "ASCENDED";
+        else if (userData.streak >= 14) rank = "ELITE";
+        else if (userData.streak >= 7) rank = "DISCIPLINED";
+        else if (userData.streak >= 3) rank = "INITIATE";
+        else if (userData.streak >= 1) rank = "AWAKENED";
         document.getElementById("rank").textContent = rank;
       }
 
-      /* =============================
-   SECTION STATES
-============================= */
-
       function updateSectionStates() {
         const morningDone = tasks.filter(t => t.category === "morning").every(t => userData.completedTasks[t.id]);
-
         const workDone = tasks.filter(t => t.category === "work").every(t => userData.completedTasks[t.id]);
-
         const eveningDone = tasks.filter(t => t.category === "evening").every(t => userData.completedTasks[t.id]);
 
-        if (morningDone) {
-          document.getElementById("morning-title").innerHTML = `✅ MORNING CONQUERED`;
-        }
-
-        if (workDone) {
-          document.getElementById("work-title").innerHTML = `✅ WORK CONQUERED`;
-        }
-
-        if (eveningDone) {
-          document.getElementById("evening-title").innerHTML = `✅ EVENING CONQUERED`;
-        }
+        if (morningDone) document.getElementById("morning-title").innerHTML = `✅ MORNING CONQUERED`;
+        if (workDone) document.getElementById("work-title").innerHTML = `✅ WORK CONQUERED`;
+        if (eveningDone) document.getElementById("evening-title").innerHTML = `✅ EVENING CONQUERED`;
       }
-
-      /* =============================
-   DAY COMPLETE
-============================= */
 
       function checkDayCompletion() {
         const done = tasks.every(t => userData.completedTasks[t.id]);
-
         if (done) {
           document.getElementById("day-complete-overlay").classList.add("active");
-
           document.body.style.overflow = "hidden";
-
-          confetti({
-            particleCount: 450,
-            spread: 180
-          });
+          confetti({ particleCount: 450, spread: 180 });
         }
       }
 
       function closeDayComplete() {
         document.getElementById("day-complete-overlay").classList.remove("active");
-
         document.body.style.overflow = "auto";
       }
 
-      /* =============================
-   SETTINGS
-============================= */
-
-      function openSettings() {
-        document.getElementById("settings-overlay").classList.add("active");
-      }
-
-      function closeSettings() {
-        document.getElementById("settings-overlay").classList.remove("active");
-      }
+      function openSettings() { document.getElementById("settings-overlay").classList.add("active"); }
+      function closeSettings() { document.getElementById("settings-overlay").classList.remove("active"); }
 
       function beginAgain() {
-        localStorage.removeItem("superhumanData");
-
-        userData = structuredClone(defaultUserData);
-
-        closeSettings();
-
-        refreshUI();
+        if (confirm("Reset ALL progress? This cannot be undone.")) {
+          userData = structuredClone(defaultUserData);
+          saveData();
+          closeSettings();
+          refreshUI();
+        }
       }
 
       /* =============================
-   INIT
-============================= */
-
-      checkDailyReset();
-
-      refreshUI();
+         INIT
+      ============================= */
+      (async () => {
+        userData = await loadData();
+        checkDailyReset();
+        await refreshUI();
+      })();
     </script>
   </body>
 </html>
