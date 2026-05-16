@@ -47,10 +47,7 @@
         animation: slideOut 0.35s forwards;
       }
       @keyframes slideOut {
-        to {
-          opacity: 0;
-          transform: translateX(70px) scale(0.96);
-        }
+        to { opacity: 0; transform: translateX(70px) scale(0.96); }
       }
       input[type="checkbox"] {
         appearance: none;
@@ -88,55 +85,89 @@
         border: 1px solid rgba(34, 211, 238, 0.22);
         color: #67e8f9;
       }
-      .sticky-panel {
-        position: static;
-      }
-      @media (min-width: 1024px) {
-        .sticky-panel {
-          position: sticky;
-          top: 16px;
-          height: fit-content;
-        }
-      }
       .badge-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
+        gap: 8px;
       }
       .badge-card {
         position: relative;
         border-radius: 12px;
-        padding: 8px 4px;
+        padding: 10px 4px;
         text-align: center;
-        min-height: 70px;
+        min-height: 74px;
         transition: 0.25s ease;
+        overflow: visible;
       }
       .badge-card.unlocked {
         background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(168, 85, 247, 0.16));
-        border: 1px solid rgba(34, 211, 238, 0.2);
+        border: 1px solid rgba(34, 211, 238, 0.25);
       }
       .badge-card.locked {
         background: #18181b;
         border: 1px solid rgba(255, 255, 255, 0.05);
-        opacity: 0.25;
+        opacity: 0.3;
         filter: grayscale(1);
+      }
+      .badge-icon {
+        font-size: 22px;
+        margin-bottom: 4px;
+      }
+      .badge-title {
+        font-size: 9px;
+        line-height: 1.1;
+        font-weight: 600;
+      }
+      .badge-tooltip {
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 160px;
+        background: #18181b;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #fff;
+        padding: 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        line-height: 1.35;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.18s ease;
+        z-index: 999;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      }
+      .badge-card:hover .badge-tooltip {
+        opacity: 1;
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.85);
+      }
+      .overlay.active {
+        display: flex;
       }
     </style>
   </head>
   <body class="min-h-screen text-zinc-100">
 
     <!-- ACHIEVEMENT POPUP -->
-    <div id="achievement-overlay" class="overlay fixed inset-0 z-[9999] hidden flex items-center justify-center bg-black/80">
-      <div class="popup-card text-center">
+    <div id="achievement-overlay" class="overlay">
+      <div class="popup-card text-center bg-zinc-900 rounded-3xl p-8 max-w-xs">
         <div id="popup-icon" class="text-8xl mb-5"></div>
         <div class="uppercase tracking-[0.35em] text-cyan-400 text-sm mb-3">Achievement Unlocked</div>
         <div id="popup-title" class="text-4xl font-bold mb-3"></div>
-        <div id="popup-desc" class="text-zinc-300 max-w-sm mx-auto leading-7"></div>
+        <div id="popup-desc" class="text-zinc-300 leading-7"></div>
       </div>
     </div>
 
     <!-- DAY COMPLETE -->
-    <div id="day-complete-overlay" class="overlay fixed inset-0 z-[9999] hidden flex items-center justify-center bg-black/80">
+    <div id="day-complete-overlay" class="overlay">
       <div class="text-center px-6 max-w-xl">
         <div class="uppercase tracking-[0.45em] text-cyan-400 text-sm mb-5">Day Complete</div>
         <div class="text-5xl font-bold mb-8">Go to sleep and rest well.</div>
@@ -152,7 +183,7 @@
     </div>
 
     <!-- SETTINGS -->
-    <div id="settings-overlay" class="overlay fixed inset-0 z-[9999] hidden flex items-center justify-center bg-black/80">
+    <div id="settings-overlay" class="overlay">
       <div class="glass rounded-3xl p-8 max-w-md w-full mx-4">
         <div class="text-2xl font-bold mb-6 text-center">Settings</div>
         <button onclick="beginAgain()" class="w-full py-4 rounded-2xl bg-red-500 hover:bg-red-400 transition-all font-semibold">↺ Begin Again</button>
@@ -169,10 +200,10 @@
             <div class="flex items-start justify-between mb-5">
               <div>
                 <div class="title-font text-3xl font-bold bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text text-transparent">SUPERHUMAN</div>
-                <div id="rank" class="text-[10px] tracking-[0.35em] text-zinc-500 mt-1">UNAWAKENED</div>
+                <div id="rank" class="text-xs tracking-widest text-zinc-500 mt-1">UNAWAKENED</div>
               </div>
-              <button onclick="openSettings()" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition-all flex items-center justify-center">
-                <i class="fa-solid fa-gear text-sm"></i>
+              <button onclick="openSettings()" class="w-9 h-9 rounded-2xl bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center">
+                <i class="fa-solid fa-gear"></i>
               </button>
             </div>
 
@@ -182,9 +213,9 @@
                 <circle id="progress-circle" cx="60" cy="60" r="52" fill="none" stroke="#22d3ee" stroke-width="10"
                   stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" />
               </svg>
-              <div class="absolute inset-0 flex items-center justify-center flex-col px-3">
-                <div id="xp" class="text-4xl font-bold leading-none">0</div>
-                <div id="xp-status" class="text-[10px] leading-3 text-cyan-400 mt-2 text-center">START STRONG</div>
+              <div class="absolute inset-0 flex items-center justify-center flex-col">
+                <div id="xp" class="text-5xl font-bold">0</div>
+                <div id="xp-status" class="text-xs text-cyan-400 mt-1">START STRONG</div>
               </div>
             </div>
 
@@ -201,11 +232,11 @@
               <div class="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
                 <div id="milestone-bar" class="h-1.5 bg-gradient-to-r from-orange-400 to-yellow-400 transition-all duration-700"></div>
               </div>
-              <div id="days-remaining" class="text-center text-[10px] text-zinc-500 mt-2"></div>
+              <div id="days-remaining" class="text-center text-xs text-zinc-500 mt-2"></div>
             </div>
 
             <button id="claim-btn" onclick="claimDay()" 
-              class="mt-6 w-full py-4 rounded-2xl font-semibold text-sm bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 transition-all">
+              class="mt-6 w-full py-4 rounded-2xl font-semibold bg-gradient-to-r from-emerald-500 to-cyan-500 hover:brightness-110 transition-all">
               🔥 CLAIM TODAY
             </button>
           </div>
@@ -415,9 +446,7 @@
           unlockBadgeByTask(id);
           
           playCompleteSound();
-          if (tasks.find(t => t.id === id && t.core)) {
-            confetti({ particleCount: 100, spread: 80 });
-          }
+          if (tasks.find(t => t.id === id && t.core)) confetti({ particleCount: 100, spread: 80 });
 
           await refreshUI();
           checkDayCompletion();
@@ -466,9 +495,9 @@
         document.getElementById("popup-icon").textContent = badge.icon;
         document.getElementById("popup-title").textContent = badge.name;
         document.getElementById("popup-desc").textContent = badge.desc;
-        overlay.classList.remove("hidden");
+        overlay.classList.add("active");
         confetti({ particleCount: 220, spread: 120 });
-        setTimeout(() => overlay.classList.add("hidden"), 5000);
+        setTimeout(() => overlay.classList.remove("active"), 5000);
       }
 
       function updateProgress() {
@@ -561,19 +590,19 @@
       function checkDayCompletion() {
         const done = tasks.every(t => userData.completedTasks[t.id]);
         if (done) {
-          document.getElementById("day-complete-overlay").classList.remove("hidden");
+          document.getElementById("day-complete-overlay").classList.add("active");
           document.body.style.overflow = "hidden";
           confetti({ particleCount: 450, spread: 180 });
         }
       }
 
       function closeDayComplete() {
-        document.getElementById("day-complete-overlay").classList.add("hidden");
+        document.getElementById("day-complete-overlay").classList.remove("active");
         document.body.style.overflow = "auto";
       }
 
-      function openSettings() { document.getElementById("settings-overlay").classList.remove("hidden"); }
-      function closeSettings() { document.getElementById("settings-overlay").classList.add("hidden"); }
+      function openSettings() { document.getElementById("settings-overlay").classList.add("active"); }
+      function closeSettings() { document.getElementById("settings-overlay").classList.remove("active"); }
 
       function beginAgain() {
         if (confirm("Reset ALL progress? This cannot be undone.")) {
